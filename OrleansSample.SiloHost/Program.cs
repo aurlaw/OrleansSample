@@ -6,10 +6,15 @@ using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
+using Microsoft.Extensions.Configuration;
+using OrleansSample.SiloHost.Config;
+using System.IO;
+
 namespace OrleansSample.SiloHost
 {
     class Program
     {
+
         public static int Main(string[] args)
         {
             return RunMainAsync().Result;
@@ -34,12 +39,14 @@ namespace OrleansSample.SiloHost
         }
         private static async Task<ISiloHost> StartSilo()
         {
+
+            var appOptions = Utilites.GetApplicationConfiguration(Path.Combine(AppContext.BaseDirectory));
             // define the cluster configuration
             var builder = new SiloHostBuilder()
                 .AddAdoNetGrainStorage("OrleansStorage", options =>
                 {
-                    options.Invariant = "System.Data.SqlClient";
-                    options.ConnectionString = "Server=MLAWRENCE-DLT\\SQLEXPRESS2017;Database=OrleansSample;Trusted_Connection=True;";
+                    options.Invariant = appOptions.OrleansInvariant;
+                    options.ConnectionString = appOptions.OrleansConnectionString;
                     options.UseJsonFormat = true;
                 })
                 .UseLocalhostClustering()

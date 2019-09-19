@@ -1,10 +1,12 @@
 ﻿using Orleans;
+using Orleans.Providers;
 using OrleansSample.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace OrleansSample.Grains
 {
+    [StorageProvider(ProviderName="OrleansStorage")]
     public class HelloArchiveGrain : Grain<GreetingArchive>, IHelloArchive
     {
         public Task<IEnumerable<string>> GetGreetings()
