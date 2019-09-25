@@ -39,6 +39,10 @@ Web Client
 dotnet run --project OrleansSample.Web
 ```
 
+https://localhost:5001/message/list
+https://localhost:5001/message/add/{message}
+https://localhost:5001/message/remove/{position}
+
 
 
 #### TODO

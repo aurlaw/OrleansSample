@@ -30,7 +30,7 @@ namespace OrleansSample.Web.Controllers
         }
         //message/add/{name}
         [HttpGet("{name}")]       
-        public IActionResult Add(string name) 
+        public async Task<IActionResult> Add(string name) 
         {
             var msgGrain = orleansClient.GetGrain<IMessage>(0);
             var result = await msgGrain.SendMessage(name);
@@ -38,34 +38,11 @@ namespace OrleansSample.Web.Controllers
         }
         //message/remove/{id}
         [HttpGet("{id}")]       
-        public IActionResult Remove(int id) 
+        public async Task<IActionResult> Remove(int id) 
         {
             var msgGrain = orleansClient.GetGrain<IMessage>(0);
             await msgGrain.RemoveMessage(id);
             return Ok($"Remove {id}");
         }
-
-/*
-                var readInput = Console.ReadLine();
-                if(string.IsNullOrEmpty(readInput))
-                    continue;
-                if(readInput.Equals("remove"))
-                {
-                    Console.WriteLine("Enter position");
-                    var pos = -1;
-                    if(Int32.TryParse(Console.ReadLine(), out pos)) 
-                    {
-                        await msgGrain.RemoveMessage(pos);
-                    }
-                }   
-                else 
-                {
-                    var results = await msgGrain.SendMessage(readInput);
-                    Console.WriteLine($"Message Response: {results}");
-                } 
- */
-
-
-
     }
 }
