@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orleans.Configuration;
+using System.Linq;
 
 namespace OrleansSample.Client
 {
@@ -72,12 +73,60 @@ namespace OrleansSample.Client
             await Task.Delay(TimeSpan.FromSeconds(4));
             return true;
         }
+        private static async Task DisplayMessages(IMessage msgGrain) 
+        {
+            Console.WriteLine("=====");
+            Console.WriteLine("Retrieving messages...");
+            var messages = await msgGrain.GetMessages();
+            if(!messages.Any()) {
+                Console.WriteLine("No messages found");
+            } 
+            else 
+            {
+                Console.WriteLine("---------");
+                var p = 0;
+                foreach(var m in messages) 
+                {
+                    var d = $"{p}|{m.PadRight(30)}|";
+                    Console.WriteLine(d);
+                    p++;
+                }
+                Console.WriteLine("---------");
+            }
+            Console.WriteLine("=====");
+        }
         private static async Task DoClientWork(IClusterClient client)
         {
             // example of calling grains from the initialized client
             var friend = client.GetGrain<IHelloArchive>(0);
             var response = await friend.SayHello("Good morning, my friend!");
             Console.WriteLine("\n\n{0}\n\n", response);
+
+            var msgGrain = client.GetGrain<IMessage>(0);
+            await DisplayMessages(msgGrain);
+            Console.WriteLine("Enter input to process... or type 'remove' to remove a message");
+            while(true) 
+            {
+                var readInput = Console.ReadLine();
+                if(string.IsNullOrEmpty(readInput))
+                    continue;
+                if(readInput.Equals("remove"))
+                {
+                    Console.WriteLine("Enter position");
+                    var pos = -1;
+                    if(Int32.TryParse(Console.ReadLine(), out pos)) 
+                    {
+                        await msgGrain.RemoveMessage(pos);
+                    }
+                    await DisplayMessages(msgGrain);
+                }   
+                else 
+                {
+                    var results = await msgGrain.SendMessage(readInput);
+                    Console.WriteLine($"Message Response: {results}");
+                    await DisplayMessages(msgGrain);
+                } 
+            }
         }
 
     }
