@@ -28,6 +28,11 @@ To start the client (you will have to use a different command window)
 dotnet run --project OrleansSample.Client
 ```
 
+Silo is configured with Orleans dashboard on port 9191.
+http://localhost:9191/
+
 #### TODO
 
-read from console
+- Web app
+- SignalR
+- Streams

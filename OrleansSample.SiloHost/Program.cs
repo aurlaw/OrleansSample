@@ -7,7 +7,7 @@ using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Microsoft.Extensions.Configuration;
-using OrleansSample.SiloHost.Config;
+using OrleansSample.Utilites.Config;
 using System.IO;
 
 namespace OrleansSample.SiloHost
@@ -39,8 +39,9 @@ namespace OrleansSample.SiloHost
         }
         private static async Task<ISiloHost> StartSilo()
         {
-
-            var appOptions = Utilites.GetApplicationConfiguration(Path.Combine(AppContext.BaseDirectory));
+            var baseDir = Path.Combine(AppContext.BaseDirectory);
+            var appOptions = AppConfiguration.GetApplicationConfiguration(baseDir);
+            var dashboardOptions = AppConfiguration.GetConfiguration<DashboardOptions>(baseDir, "Dashboard");
             // define the cluster configuration
             var builder = new SiloHostBuilder()
                 .AddAdoNetGrainStorage("OrleansStorage", options =>
@@ -52,12 +53,18 @@ namespace OrleansSample.SiloHost
                 .UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>
                 {
-                    options.ClusterId = "dev";
-                    options.ServiceId = "HelloWorldApp";
+                    options.ClusterId = appOptions.ClusterId;
+                    options.ServiceId = appOptions.ServiceId;
                 })
                 .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(HelloGrain).Assembly).WithReferences())
-                .ConfigureLogging(logging => logging.AddConsole());
+                .ConfigureLogging(logging => logging.AddConsole())
+                .UseDashboard(options => {
+                        options.Host = dashboardOptions.Host;
+                        options.Port = dashboardOptions.Port;
+                        options.HostSelf = dashboardOptions.HostSelf;
+                        options.CounterUpdateIntervalMs = dashboardOptions.CounterUpdateIntervalMs;
+                });
 
             var host = builder.Build();
             await host.StartAsync();

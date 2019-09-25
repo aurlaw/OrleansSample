@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orleans.Configuration;
 using System.Linq;
+using OrleansSample.Utilites.Config;
+using System.IO;
 
 namespace OrleansSample.Client
 {
@@ -41,13 +43,14 @@ namespace OrleansSample.Client
         private static async Task<IClusterClient> StartClientWithRetries()
         {
             attempt = 0;
+            var appOptions = AppConfiguration.GetApplicationConfiguration(Path.Combine(AppContext.BaseDirectory));
             IClusterClient client;
             client = new ClientBuilder()
                 .UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>
                 {
-                    options.ClusterId = "dev";
-                    options.ServiceId = "HelloWorldApp";
+                    options.ClusterId = appOptions.ClusterId;
+                    options.ServiceId = appOptions.ServiceId;
                 })
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
@@ -103,6 +106,16 @@ namespace OrleansSample.Client
             Console.WriteLine("\n\n{0}\n\n", response);
 
             var msgGrain = client.GetGrain<IMessage>(0);
+            // create observer 
+            var mo = new MessageObserver(async (message) => {
+                await DisplayMessages(msgGrain);
+            });
+            //Create a reference for chat usable for subscribing to the observable grain.
+            var moObj = await client.CreateObjectReference<IObserver>(mo);
+            // subscribe observer
+            await msgGrain.Subscribe(moObj);
+
+            // display message
             await DisplayMessages(msgGrain);
             Console.WriteLine("Enter input to process... or type 'remove' to remove a message");
             while(true) 
@@ -118,13 +131,11 @@ namespace OrleansSample.Client
                     {
                         await msgGrain.RemoveMessage(pos);
                     }
-                    await DisplayMessages(msgGrain);
                 }   
                 else 
                 {
                     var results = await msgGrain.SendMessage(readInput);
                     Console.WriteLine($"Message Response: {results}");
-                    await DisplayMessages(msgGrain);
                 } 
             }
         }

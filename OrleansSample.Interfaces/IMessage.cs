@@ -11,5 +11,7 @@ namespace OrleansSample.Interfaces
 
         Task RemoveMessage(int position);
 
+        Task Subscribe(IObserver observer);
+        Task UnSubscribe(IObserver observer);
     }
 }
