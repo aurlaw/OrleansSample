@@ -76,6 +76,7 @@ namespace OrleansSample.Client
             await Task.Delay(TimeSpan.FromSeconds(4));
             return true;
         }
+
         private static async Task DisplayMessages(IMessage msgGrain) 
         {
             Console.WriteLine("=====");

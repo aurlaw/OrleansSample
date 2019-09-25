@@ -21,15 +21,25 @@ To start the silo
 ```
 dotnet run --project OrleansSample.SiloHost
 ```
+Silo is configured with Orleans dashboard on port 9191.
+http://localhost:9191/
 
 
 To start the client (you will have to use a different command window)
+
+Console Client
 ```
 dotnet run --project OrleansSample.Client
 ```
 
-Silo is configured with Orleans dashboard on port 9191.
-http://localhost:9191/
+or 
+
+Web Client
+```
+dotnet run --project OrleansSample.Web
+```
+
+
 
 #### TODO
 
