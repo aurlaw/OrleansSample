@@ -43,14 +43,28 @@ namespace OrleansSample.SiloHost
             var appOptions = AppConfiguration.GetApplicationConfiguration(baseDir);
             var dashboardOptions = AppConfiguration.GetConfiguration<DashboardOptions>(baseDir, "Dashboard");
             // define the cluster configuration
-            var builder = new SiloHostBuilder()
-                .AddAdoNetGrainStorage("OrleansStorage", options =>
-                {
-                    options.Invariant = appOptions.OrleansInvariant;
-                    options.ConnectionString = appOptions.OrleansConnectionString;
-                    options.UseJsonFormat = true;
-                })
-                .UseLocalhostClustering()
+            var builder = new SiloHostBuilder();
+            switch(appOptions.StorageType) 
+            {
+                case StorageType.AzureTable:
+                    builder.AddAzureTableGrainStorage("OrleansStorage", options => 
+                    {
+                        options.ConnectionString = appOptions.OrleansConnectionString;
+                        options.TableName = appOptions.AzureTableName;
+                        options.UseJson = appOptions.UseJson;
+                    });
+                break;
+                default:
+                    builder.AddAdoNetGrainStorage("OrleansStorage", options =>
+                    {
+                        options.Invariant = appOptions.AdoInvariant;
+                        options.ConnectionString = appOptions.OrleansConnectionString;
+                        options.UseJsonFormat = appOptions.UseJson;
+                    });
+                break;
+            }
+
+            builder.UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = appOptions.ClusterId;

@@ -9,9 +9,12 @@ namespace OrleansSample.Utilites.Config
     {
         public static IConfigurationRoot GetIConfigurationRoot(string outputPath)
         {
+            var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
             return new ConfigurationBuilder()
                 .SetBasePath(outputPath)
                 .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile($"appsettings.{environmentName}.json", true, true)
                 .AddEnvironmentVariables()
                 .Build();
         }
