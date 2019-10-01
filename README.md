@@ -11,6 +11,7 @@ You must create a SQL database then execute the Main and Persistance scripts und
 
 Update the ```appsettings.json``` within the SiloHost project.
 
+Also, this sample supports Azure Table Storage instead of SQL Server. Just set  ```"StorageType": "AzureTable"```, ```"AzureTableName": "YOUR AZURE TABLE NAME"``` and the ```"OrleansConnectionString"``` to your Azure Table connection string.
 
 #### Running the sample
 From Visual Studio, you can start start the SiloHost and OrleansClient projects simultaneously (you can set up multiple startup projects by right-clicking the solution in the Solution Explorer, and select `Set StartUp projects`.
@@ -50,4 +51,6 @@ https://localhost:5001/message/remove/{position}
 - Web app
 - SignalR
 - Streams
-- https://github.com/dotnet/orleans/tree/master/src/SDK
+- Modify conf settings for xml support files: 
+ https://github.com/dotnet/orleans/tree/master/src/SDK
+ - https://medium.com/@kritner/microsoft-orleans-easily-switching-between-development-and-production-configurations-20e109be6458
