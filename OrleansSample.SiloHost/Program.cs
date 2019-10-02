@@ -9,6 +9,7 @@ using Orleans.Hosting;
 using Microsoft.Extensions.Configuration;
 using OrleansSample.Utilites.Config;
 using System.IO;
+using OrleansSample.Interfaces;
 
 namespace OrleansSample.SiloHost
 {
@@ -47,15 +48,16 @@ namespace OrleansSample.SiloHost
             switch(appOptions.StorageType) 
             {
                 case StorageType.AzureTable:
-                    builder.AddAzureTableGrainStorage("OrleansStorage", options => 
+                    builder.AddAzureTableGrainStorage(Constants.StorageName, options => 
                     {
                         options.ConnectionString = appOptions.OrleansConnectionString;
                         options.TableName = appOptions.AzureTableName;
                         options.UseJson = appOptions.UseJson;
                     });
+                    
                 break;
                 default:
-                    builder.AddAdoNetGrainStorage("OrleansStorage", options =>
+                    builder.AddAdoNetGrainStorage(Constants.StorageName, options =>
                     {
                         options.Invariant = appOptions.AdoInvariant;
                         options.ConnectionString = appOptions.OrleansConnectionString;
@@ -71,9 +73,27 @@ namespace OrleansSample.SiloHost
                     options.ServiceId = appOptions.ServiceId;
                 })
                 .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
-                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(HelloGrain).Assembly).WithReferences())
-                .ConfigureLogging(logging => logging.AddConsole())
-                .UseDashboard(options => {
+                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IGrainMarker).Assembly).WithReferences())
+                .ConfigureServices(DependencyInjectionHelper.IocContainerRegistration)
+                .ConfigureLogging(logging => logging.AddConsole());
+            switch(appOptions.StorageType) 
+            {
+                case StorageType.AzureTable:
+                    builder.UseAzureTableReminderService(options => {
+                        options.ConnectionString = appOptions.OrleansConnectionString;
+
+                    });
+                    
+                break;
+                default:
+                    builder.UseAdoNetReminderService(options => {
+                        options.ConnectionString = appOptions.OrleansConnectionString;
+
+                    });
+                break;
+            }
+
+                builder.UseDashboard(options => {
                         options.Host = dashboardOptions.Host;
                         options.Port = dashboardOptions.Port;
                         options.HostSelf = dashboardOptions.HostSelf;

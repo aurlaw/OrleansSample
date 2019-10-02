@@ -43,7 +43,18 @@ namespace OrleansSample.Web
                 .ConfigureLogging(logging => logging.AddConsole());
 
             var client = clientBuilder.Build();
-            client.Connect().Wait();
+            /*
+            an easier way to achieve client retries is to pass a retry delegate to the Connect() method. 
+            The following is a simple example of how a fixed-interval retry could be implemented, 
+            but such a delegate makes it easy to implement more advanced mechanisms such as exponential backoff. 
+            */
+            client.Connect(async ex => 
+            {
+                Console.WriteLine(ex);
+                Console.WriteLine("Retrying orleans connection...");
+                await Task.Delay(3000);
+                return true;
+            }).Wait();
 
             return client;
         }

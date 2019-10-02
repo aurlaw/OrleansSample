@@ -10,7 +10,8 @@ using OrleansSample.Interfaces;
 
 namespace OrleansSample.Web.Controllers
 {
-    [Route("[controller]/[action]")]
+    [Produces("application/json")]
+    [Route("api/messages")]
     public class MessageController : Controller
     {
         private readonly IClusterClient orleansClient;
@@ -20,25 +21,34 @@ namespace OrleansSample.Web.Controllers
             this.orleansClient = orleansClient;
 
         }
-        //message/list
+        //api/messages/list
+        [HttpGet]
         public async Task<IActionResult> List()
         {
             var msgGrain = orleansClient.GetGrain<IMessage>(0);
             var messages = await msgGrain.GetMessages();
-
-            return Ok(messages);
+            var results = messages.Select((message, position) => new {position, message});
+            return Ok(results);
         }
-        //message/add/{name}
-        [HttpGet("{name}")]       
-        public async Task<IActionResult> Add(string name) 
+        //api/messages/{name}
+        [HttpPut("{name}")]       
+        public async Task<IActionResult> Put([FromRoute]string name) 
         {
             var msgGrain = orleansClient.GetGrain<IMessage>(0);
             var result = await msgGrain.SendMessage(name);
             return Ok($"Added {result}");
         }
-        //message/remove/{id}
-        [HttpGet("{id}")]       
-        public async Task<IActionResult> Remove(int id) 
+        //api/messages/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get([FromRoute]int id)
+        {
+            var msgGrain = orleansClient.GetGrain<IMessage>(0);
+            var message = await msgGrain.GetMessage(id);
+            return Ok(message);
+        }
+        //api/messages/{id}
+        [HttpDelete("{id}")]       
+        public async Task<IActionResult> Delete([FromRoute]int id) 
         {
             var msgGrain = orleansClient.GetGrain<IMessage>(0);
             await msgGrain.RemoveMessage(id);

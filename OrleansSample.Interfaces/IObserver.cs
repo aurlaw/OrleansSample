@@ -8,5 +8,3 @@ namespace OrleansSample.Interfaces
 
     }
 }
-
-//        public event EventHandler ThresholdReached;

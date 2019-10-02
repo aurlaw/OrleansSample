@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace OrleansSample.Grains
 {
-    [StorageProvider(ProviderName="OrleansStorage")]
-    public class HelloArchiveGrain : Grain<GreetingArchive>, IHelloArchive
+    [StorageProvider(ProviderName = Constants.StorageName)]
+    public class HelloArchiveGrain : Grain<GreetingArchive>, IHelloArchive, IGrainMarker
     {
         public Task<IEnumerable<string>> GetGreetings()
         {

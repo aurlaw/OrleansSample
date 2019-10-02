@@ -7,8 +7,8 @@ using Orleans.Concurrency;
 
 namespace OrleansSample.Grains
 {
-    [StorageProvider(ProviderName = "OrleansStorage")]
-    public class Message : Grain<MessageArchive>, IMessage
+    [StorageProvider(ProviderName = Constants.StorageName)]
+    public class MessageGrain : Grain<MessageArchive>, IMessage, IGrainMarker
     {
         private  ObserverSubscriptionManager<IObserver> _subsManager;
 
@@ -17,11 +17,6 @@ namespace OrleansSample.Grains
             // We created the utility at activation time.
             _subsManager = new ObserverSubscriptionManager<IObserver>();
             await base.OnActivateAsync();
-        }
-        private Task NotifyObserver(string message) 
-        {
-            _subsManager.Notify(s => s.ReceiveMessage(message));
-            return Task.CompletedTask;
         }
 
         public Task<IEnumerable<string>> GetMessages()
@@ -52,6 +47,16 @@ namespace OrleansSample.Grains
              return $"Message: '{msg}'";
         }
 
+        public Task<string> GetMessage(int position) 
+        {
+            if(position >= 0 && position < State.Messages.Count) 
+            {
+                return Task.FromResult(State.Messages[position]);
+
+            }
+            return Task.FromResult(string.Empty);
+        }
+
         public Task Subscribe(IObserver observer)
         {
             if(!_subsManager.IsSubscribed(observer))
@@ -69,6 +74,12 @@ namespace OrleansSample.Grains
             }
             return Task.CompletedTask;
         }
+        public Task NotifyObserver(string message) 
+        {
+            _subsManager.Notify(s => s.ReceiveMessage(message));
+            return Task.CompletedTask;
+        }
+
     }
 
     public class MessageArchive

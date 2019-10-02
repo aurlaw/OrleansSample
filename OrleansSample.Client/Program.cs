@@ -106,6 +106,17 @@ namespace OrleansSample.Client
             var response = await friend.SayHello("Good morning, my friend!");
             Console.WriteLine("\n\n{0}\n\n", response);
 
+            // reminder test
+            var reminderGrain = client.GetGrain<IEverythingIsOkGrain>($"{nameof(IEverythingIsOkGrain)}-{Guid.NewGuid()}");
+            Console.WriteLine("Starting 'everything's ok' alarm after key press'");
+            Console.ReadKey();
+            Console.WriteLine("Starting 'everything's ok' reminder...'");
+            await reminderGrain.Start();
+            Console.WriteLine("Reminder started, press any key to stop reminder");
+            Console.ReadKey();
+            await reminderGrain.Stop();
+
+
             var msgGrain = client.GetGrain<IMessage>(0);
             // create observer 
             var mo = new MessageObserver(async (message) => {

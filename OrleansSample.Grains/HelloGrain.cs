@@ -5,8 +5,8 @@ using Orleans.Providers;
 
 namespace OrleansSample.Grains
 {
-    [StorageProvider(ProviderName="OrleansStorage")]
-    public class HelloGrain : Orleans.Grain, IHello
+    [StorageProvider(ProviderName = Constants.StorageName)]
+    public class HelloGrain : Orleans.Grain, IHello, IGrainMarker
     {
         private readonly ILogger logger;
 

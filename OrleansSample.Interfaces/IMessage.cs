@@ -1,17 +1,14 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Orleans;
 
 namespace OrleansSample.Interfaces
 {
-    public interface IMessage : Orleans.IGrainWithIntegerKey
+    public interface IMessage : IGrainWithIntegerKey, IObserverManger
     {
-         Task<string> SendMessage(string msg);
-
+        Task<string> SendMessage(string msg);
         Task<IEnumerable<string>> GetMessages();
-
+        Task<string> GetMessage(int position);
         Task RemoveMessage(int position);
-
-        Task Subscribe(IObserver observer);
-        Task UnSubscribe(IObserver observer);
     }
 }
