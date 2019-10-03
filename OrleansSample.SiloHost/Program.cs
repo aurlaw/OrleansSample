@@ -54,7 +54,9 @@ namespace OrleansSample.SiloHost
                         options.TableName = appOptions.AzureTableName;
                         options.UseJson = appOptions.UseJson;
                     });
-                    
+                    builder.UseAzureTableReminderService(options => {
+                        options.ConnectionString = appOptions.OrleansConnectionString;
+                    });                    
                 break;
                 default:
                     builder.AddAdoNetGrainStorage(Constants.StorageName, options =>
@@ -63,9 +65,11 @@ namespace OrleansSample.SiloHost
                         options.ConnectionString = appOptions.OrleansConnectionString;
                         options.UseJsonFormat = appOptions.UseJson;
                     });
+                    builder.UseAdoNetReminderService(options => {
+                        options.ConnectionString = appOptions.OrleansConnectionString;
+                    });
                 break;
             }
-
             builder.UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>
                 {
@@ -74,32 +78,16 @@ namespace OrleansSample.SiloHost
                 })
                 .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IGrainMarker).Assembly).WithReferences())
+                .AddSimpleMessageStreamProvider(Constants.StreamProvider)
+                .AddMemoryGrainStorage(Constants.StreamStorage)
                 .ConfigureServices(DependencyInjectionHelper.IocContainerRegistration)
-                .ConfigureLogging(logging => logging.AddConsole());
-            switch(appOptions.StorageType) 
-            {
-                case StorageType.AzureTable:
-                    builder.UseAzureTableReminderService(options => {
-                        options.ConnectionString = appOptions.OrleansConnectionString;
-
-                    });
-                    
-                break;
-                default:
-                    builder.UseAdoNetReminderService(options => {
-                        options.ConnectionString = appOptions.OrleansConnectionString;
-
-                    });
-                break;
-            }
-
-                builder.UseDashboard(options => {
+                .ConfigureLogging(logging => logging.AddConsole())
+                .UseDashboard(options => {
                         options.Host = dashboardOptions.Host;
                         options.Port = dashboardOptions.Port;
                         options.HostSelf = dashboardOptions.HostSelf;
                         options.CounterUpdateIntervalMs = dashboardOptions.CounterUpdateIntervalMs;
                 });
-
             var host = builder.Build();
             await host.StartAsync();
             return host;

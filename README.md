@@ -51,9 +51,9 @@ https://localhost:5001/swagger
 
 - ~~Web app~~
 - SignalR
-- Streams
+- ~~Streams (explicit and implicit)~~
 - ~~Reminders~~
-- Observers (https://medium.com/@kritner/microsoft-orleans-observables-5e0040c949cd)
+- ~~Observers (https://medium.com/@kritner/microsoft-orleans-observables-5e0040c949cd)~~
 - Modify conf settings for xml support files: 
  https://github.com/dotnet/orleans/tree/master/src/SDK
  - https://medium.com/@kritner/microsoft-orleans-easily-switching-between-development-and-production-configurations-20e109be6458

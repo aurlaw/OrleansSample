@@ -8,10 +8,13 @@ using Orleans.Configuration;
 using System.Linq;
 using OrleansSample.Utilites.Config;
 using System.IO;
+using OrleansSample.Interfaces.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Orleans.Hosting;
 
 namespace OrleansSample.Client
 {
-    class Program
+    public class Program
     {
         const int initializeAttemptsBeforeFailing = 5;
         private static int attempt = 0;
@@ -25,9 +28,19 @@ namespace OrleansSample.Client
         {
             try
             {
+        //setup our DI
+                var serviceProvider = new ServiceCollection()
+                    .AddLogging(logging =>
+                    {
+                        logging.AddConsole();
+                    })
+                    .BuildServiceProvider();
+
+            var logger = serviceProvider.GetService<ILoggerFactory>();
+            
                 using (var client = await StartClientWithRetries())
                 {
-                    await DoClientWork(client);
+                    await DoClientWork(logger, client);
                     Console.ReadKey();
                 }
 
@@ -52,6 +65,7 @@ namespace OrleansSample.Client
                     options.ClusterId = appOptions.ClusterId;
                     options.ServiceId = appOptions.ServiceId;
                 })
+                .AddSimpleMessageStreamProvider(Constants.StreamProvider)
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
 
@@ -99,7 +113,7 @@ namespace OrleansSample.Client
             }
             Console.WriteLine("=====");
         }
-        private static async Task DoClientWork(IClusterClient client)
+        private static async Task DoClientWork(ILoggerFactory loggerFactory, IClusterClient client)
         {
             // example of calling grains from the initialized client
             var friend = client.GetGrain<IHelloArchive>(0);
@@ -116,40 +130,87 @@ namespace OrleansSample.Client
             Console.ReadKey();
             await reminderGrain.Stop();
 
-
-            var msgGrain = client.GetGrain<IMessage>(0);
-            // create observer 
-            var mo = new MessageObserver(async (message) => {
-                await DisplayMessages(msgGrain);
-            });
-            //Create a reference for chat usable for subscribing to the observable grain.
-            var moObj = await client.CreateObjectReference<IObserver>(mo);
-            // subscribe observer
-            await msgGrain.Subscribe(moObj);
-
-            // display message
-            await DisplayMessages(msgGrain);
-            Console.WriteLine("Enter input to process... or type 'remove' to remove a message");
-            while(true) 
-            {
-                var readInput = Console.ReadLine();
-                if(string.IsNullOrEmpty(readInput))
-                    continue;
-                if(readInput.Equals("remove"))
+            // Streams
+            var key = Constants.TodoKey;
+            var todoGrain = client.GetGrain<ITodo>(key);
+            // subscribe to events
+            var subscription = await client.GetStreamProvider(Constants.StreamProvider)
+                .GetStream<TodoNotification>(key, nameof(ITodo))
+                .SubscribeAsync(new TodoItemObserver(loggerFactory, (notification) => 
                 {
-                    Console.WriteLine("Enter position");
-                    var pos = -1;
-                    if(Int32.TryParse(Console.ReadLine(), out pos)) 
+                    switch(notification.NotificationType)
                     {
-                        await msgGrain.RemoveMessage(pos);
+                        case NotificationType.Add:
+                            Console.WriteLine($"Added: {notification.Key}");
+                        break;
+                        case NotificationType.Remove:
+                            Console.WriteLine($"Removed: {notification.Key}");
+                        break;
+                        case NotificationType.Clear:
+                            Console.WriteLine("Cleared all Todos");
+                        break;
                     }
-                }   
+                    return Task.CompletedTask;
+                } ));
+            while(true)
+            {
+                Console.WriteLine("Enter Todo item - type `clear` to remove all items,  type `exit` to end sessions");
+                Console.WriteLine("Title:");
+                var title = Console.ReadLine();
+                if(string.IsNullOrEmpty(title))
+                {
+                    continue;
+                }
+                else if (title.Equals("clear", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    await todoGrain.ClearAsync();
+                }
+                else if (title.Equals("exit", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    subscription?.UnsubscribeAsync();
+                    break;
+                } 
                 else 
                 {
-                    var results = await msgGrain.SendMessage(readInput);
-                    Console.WriteLine($"Message Response: {results}");
-                } 
+                    var item = new TodoItem(Guid.NewGuid(),title, DateTime.UtcNow);
+                    await todoGrain.SetAsync(item);
+                }
             }
+
+
+            // var msgGrain = client.GetGrain<IMessage>(0);
+            // // create observer 
+            // var mo = new MessageObserver(async (message) => {
+            //     await DisplayMessages(msgGrain);
+            // });
+            // //Create a reference for chat usable for subscribing to the observable grain.
+            // var moObj = await client.CreateObjectReference<IObserver>(mo);
+            // // subscribe observer
+            // await msgGrain.Subscribe(moObj);
+
+            // // display message
+            // await DisplayMessages(msgGrain);
+            // Console.WriteLine("Enter input to process... or type 'remove' to remove a message");
+            // while(true) 
+            // {
+            //     var readInput = Console.ReadLine();
+            //     if(string.IsNullOrEmpty(readInput))
+            //         continue;
+            //     if(readInput.Equals("remove"))
+            //     {
+            //         Console.WriteLine("Enter position");
+            //         var pos = -1;
+            //         if(Int32.TryParse(Console.ReadLine(), out pos)) 
+            //         {
+            //             await msgGrain.RemoveMessage(pos);
+            //         }
+            //     }   
+            //     else 
+            //     {
+            //         var results = await msgGrain.SendMessage(readInput);
+            //         Console.WriteLine($"Message Response: {results}");
+            //     } 
+            // }
         }
 
     }
