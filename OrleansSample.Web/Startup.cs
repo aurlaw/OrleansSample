@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using OrleansSample.Utilites.Config;
+using OrleansSample.Web.Hubs;
 
 namespace OrleansSample.Web
 {
@@ -43,6 +44,7 @@ namespace OrleansSample.Web
             services.AddOrleans(Configuration.GetSection("Application"));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddSignalR();
 
             // swagger
             services.AddSwaggerGen(c =>
@@ -72,6 +74,10 @@ namespace OrleansSample.Web
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Orleans API");
+            });
+             app.UseSignalR(routes =>
+            {
+                routes.MapHub<TodoHub>("/todoHub");
             });
             app.UseMvc(routes =>
             {
