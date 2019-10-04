@@ -9,6 +9,7 @@ using System.Linq;
 using OrleansSample.Utilites.Config;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Orleans.Hosting;
 
 namespace OrleansSample.Web
 {
@@ -40,6 +41,7 @@ namespace OrleansSample.Web
                     options.ClusterId = appOptions.ClusterId;
                     options.ServiceId = appOptions.ServiceId;
                 })
+                .AddSimpleMessageStreamProvider(Constants.StreamProvider)
                 .ConfigureLogging(logging => logging.AddConsole());
 
             var client = clientBuilder.Build();
