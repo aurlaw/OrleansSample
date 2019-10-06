@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using OrleansSample.Utilites.Config;
 using OrleansSample.Web.Hubs;
+using OrleansSample.Web.Services;
 
 namespace OrleansSample.Web
 {
@@ -40,6 +41,8 @@ namespace OrleansSample.Web
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+            //
+            services.AddSingleton<ISubscriptionManager, SubscriptionManager>();// leave as singleton , for now
             // add orleans
             services.AddOrleans(Configuration.GetSection("Application"));
 
@@ -66,7 +69,7 @@ namespace OrleansSample.Web
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
             // swagger
