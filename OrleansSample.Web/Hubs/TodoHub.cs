@@ -58,5 +58,4 @@ namespace OrleansSample.Web.Hubs
             logger.LogInformation("SubscribeReceived sent");
         }
     }
-
 }

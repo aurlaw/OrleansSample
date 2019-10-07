@@ -16,6 +16,9 @@ namespace OrleansSample.Utilites.Config
         public string AdoInvariant { get; set; }
         public string AzureTableName { get; set; }
 
+        public string StorageConnection {get;set;}
+        public string StorageKey {get;set;}
+
     }
 
     public enum StorageType 

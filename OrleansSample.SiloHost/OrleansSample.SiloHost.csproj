@@ -20,6 +20,7 @@
     <PackageReference Include="Microsoft.Orleans.Persistence.AzureStorage" Version="2.4.2"/>
     <PackageReference Include="Microsoft.Orleans.Reminders.AzureStorage" Version="2.4.2"/>
     <PackageReference Include="Microsoft.Orleans.Reminders.AdoNet" Version="2.4.2"/>
+    <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="11.1.0"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OrleansSample.Grains\OrleansSample.Grains.csproj"/>
