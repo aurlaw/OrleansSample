@@ -10,7 +10,7 @@ namespace OrleansSample.Interfaces.Models
         public string Title { get; }
         public DateTime Timestamp { get; }
 
-        public string ImageUrl {get;}
+        public string ImageUrl {get; set;}
 
         public TodoItem(Guid key, string title, DateTime time, string imageUrl = null) 
         {

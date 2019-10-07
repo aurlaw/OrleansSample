@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using OrleansSample.Interfaces.Models;
 using Microsoft.Extensions.Logging;
+using OrleansSample.Interfaces.Service;
 
 namespace OrleansSample.Grains
 {
@@ -13,10 +14,12 @@ namespace OrleansSample.Grains
     public class TodoGrain : Grain<TodoState>, ITodo, IGrainMarker
     {
         private ILogger logger;
+        private IBlobStorage storage;
         
-        public TodoGrain(ILoggerFactory loggerFactory)
+        public TodoGrain(ILoggerFactory loggerFactory,IBlobStorage storage)
         {
             this.logger = loggerFactory.CreateLogger($"{this.GetType().Name}-{this.IdentityString}");
+            this.storage = storage;
         }
         public async Task ClearAsync()
         {
@@ -36,9 +39,13 @@ namespace OrleansSample.Grains
             return Task.FromResult<IEnumerable<TodoItem>>(State.Items);
         }
 
-        public async Task SetAsync(TodoItem item)
+        public async Task SetAsync(TodoItem item, TodoImageUpload imageUpload = null)
         {
             logger.LogInformation($"adding todo item: {item.Key}");
+            if(imageUpload != null) 
+            {
+                item.ImageUrl = await storage.Upload(imageUpload.ImageName, Constants.StorageContainer, imageUpload.ImageData);
+            }
             State.Items.Add(item);
             await WriteStateAsync();
 

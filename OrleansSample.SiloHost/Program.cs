@@ -10,12 +10,13 @@ using Microsoft.Extensions.Configuration;
 using OrleansSample.Utilites.Config;
 using System.IO;
 using OrleansSample.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace OrleansSample.SiloHost
 {
     class Program
     {
-
+        public static  IConfiguration Configuration;
         public static int Main(string[] args)
         {
             return RunMainAsync().Result;
@@ -41,6 +42,8 @@ namespace OrleansSample.SiloHost
         private static async Task<ISiloHost> StartSilo()
         {
             var baseDir = Path.Combine(AppContext.BaseDirectory);
+            Configuration = AppConfiguration.GetIConfigurationRoot(baseDir);
+
             var appOptions = AppConfiguration.GetApplicationConfiguration(baseDir);
             var dashboardOptions = AppConfiguration.GetConfiguration<DashboardOptions>(baseDir, "Dashboard");
             // define the cluster configuration
@@ -80,7 +83,10 @@ namespace OrleansSample.SiloHost
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IGrainMarker).Assembly).WithReferences())
                 .AddSimpleMessageStreamProvider(Constants.StreamProvider)
                 .AddMemoryGrainStorage(Constants.StreamStorage)
-                .ConfigureServices(DependencyInjectionHelper.IocContainerRegistration)
+                .ConfigureServices((service) => {
+                    service.Configure<ApplicationOptions>(Configuration);
+                    DependencyInjectionHelper.IocContainerRegistration(service);
+                })
                 .ConfigureLogging(logging => logging.AddConsole())
                 .UseDashboard(options => {
                         options.Host = dashboardOptions.Host;

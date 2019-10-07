@@ -16,6 +16,7 @@
    </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OrleansSample.Interfaces\OrleansSample.Interfaces.csproj" />
+    <ProjectReference Include="..\OrleansSample.Utilites\OrleansSample.Utilites.csproj" />
   </ItemGroup>
 
 </Project>

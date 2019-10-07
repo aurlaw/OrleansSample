@@ -1,6 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using OrleansSample.Grains;
+using OrleansSample.Grains.Service;
 using OrleansSample.Interfaces;
+using OrleansSample.Interfaces.Service;
+using OrleansSample.Utilites.Config;
 
 namespace OrleansSample.SiloHost
 {
@@ -13,6 +16,7 @@ namespace OrleansSample.SiloHost
         public static void IocContainerRegistration(IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<IEmailSender, FakeEmailSender>();
+            serviceCollection.AddTransient<IBlobStorage, BlobStorage>();
         }        
     }
 }
