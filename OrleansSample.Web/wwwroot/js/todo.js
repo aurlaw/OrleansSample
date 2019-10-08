@@ -26,9 +26,11 @@ connection.on("SubscribeReceived", function(results) {
     appendLog('Starting Log...');
 
 });
-connection.on("Notification", function(record) {
+connection.on("Notification", function(record, item) {
     console.log(record);
+    console.log(item);
     appendLog(record);
+    appendTodo(item);
 });
 connection.on("SubscriptionCleared", function() {
     clearLog();
@@ -42,22 +44,23 @@ connection.start().then(function(){
     return console.error(err.toString());
 });
 
-document.querySelector("#sendButton").addEventListener("click", function (event) {
-    var message = document.querySelector("#name").value;
-    addTodo(message);
-    clear();
-    event.preventDefault();
-});
-document.querySelector('#name').addEventListener('keypress', function (event) {
-    var key = event.which || event.keyCode;
-    if (key === 13) { // 13 is enter
-      // code for enter
-      var message = document.querySelector("#name").value;
-      addTodo(message);
-      clear();
-      event.preventDefault();
-    }
-});
+// document.querySelector("#sendButton").addEventListener("click", function (event) {
+//     var message = document.querySelector("#name").value;
+//     addTodo(message);
+//     clear();
+//     event.preventDefault();
+// });
+// document.querySelector('#name').addEventListener('keypress', function (event) {
+//     var key = event.which || event.keyCode;
+//     if (key === 13) { // 13 is enter
+//       // code for enter
+//       var message = document.querySelector("#name").value;
+//       addTodo(message);
+//       clear();
+//       event.preventDefault();
+//     }
+// });
+
 document.querySelector("#clearButton").addEventListener("click", function(event) {
     connection.invoke("ClearTodos").catch(function(err) {
         return console.error(err.toString());
@@ -74,18 +77,18 @@ document.querySelector("#subscribeButton").addEventListener("click", function (e
     event.preventDefault();
 });
 
-document.addEventListener("DOMContentLoaded", function(){
-    // Handler when the DOM is fully loaded
-    console.log("Ready");
-  });
+// document.addEventListener("DOMContentLoaded", function(){
+//     // Handler when the DOM is fully loaded
+//     console.log("Ready");
+//   });
 
 
-function addTodo(message) {
-    connection.invoke("AddTodo", message).catch(function (err) {
-        return console.error(err.toString());
-    });
+// function addTodo(message) {
+//     connection.invoke("AddTodo", message).catch(function (err) {
+//         return console.error(err.toString());
+//     });
 
-}
+// }
 function clear() {
     document.querySelector("#name").value = "";
 }
@@ -101,7 +104,14 @@ function clearTodos() {
 
 function appendTodo(todo) {
     var li = document.createElement("li");
-    li.textContent = todo.key + "-" + todo.title;
+    li.setAttribute("id", todo.key);
+    li.textContent = todo.title;
+    if(todo.imageUrl)
+    {
+        var img = document.createElement("img");
+        img.src = todo.imageUrl;
+        li.appendChild(img);
+    }
     document.getElementById("messagesList").appendChild(li);
 }
 
@@ -116,4 +126,21 @@ function appendLog(record) {
     var div = document.createElement("div");
     div.textContent = record;
     document.getElementById("log").appendChild(div);
+}
+
+// add todo
+async function TodoSubmit(form) {
+    console.log('Submit todo', form);
+    const formData = new FormData(form);
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData
+        });
+        console.log('result', response);
+        console.log('result', response.json());
+    } 
+    catch(e) {
+        console.error('error', e);
+    }
 }

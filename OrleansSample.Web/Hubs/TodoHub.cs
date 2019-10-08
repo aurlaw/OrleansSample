@@ -51,7 +51,7 @@ namespace OrleansSample.Web.Hubs
             var result = await todoGrain.GetAllAsync();
             // create subscription
             var handleId = await subscriptionManager.CreateSubscription(Context, subId,  async(args) => {
-                await args.SubscriptionGroup.SendAsync("Notification", args.Message);
+                await args.SubscriptionGroup.SendAsync("Notification", args.Message, args.Item);
             });
             // send message to caller
             await Clients.Caller.SendAsync("SubscribeReceived", new {result, handleId});

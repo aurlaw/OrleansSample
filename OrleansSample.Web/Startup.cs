@@ -43,6 +43,7 @@ namespace OrleansSample.Web
             });
             //
             services.AddSingleton<ISubscriptionManager, SubscriptionManager>();// leave as singleton , for now
+            services.AddTransient<IImageService, ImageService>();
             // add orleans
             services.AddOrleans(Configuration.GetSection("Application"));
 

@@ -2,6 +2,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Orleans.Concurrency;
 using OrleansSample.Interfaces.Models;
 
 namespace OrleansSample.Web.Services
@@ -21,7 +22,7 @@ namespace OrleansSample.Web.Services
             using (var stream = new MemoryStream())
             {
                 await file.CopyToAsync(stream);
-                return new TodoImageUpload(file.FileName, stream.ToArray());   
+                return new TodoImageUpload(file.FileName, new Immutable<byte[]>(stream.ToArray()));   
             }
         }
     }

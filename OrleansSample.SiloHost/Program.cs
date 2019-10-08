@@ -85,6 +85,8 @@ namespace OrleansSample.SiloHost
                 .AddMemoryGrainStorage(Constants.StreamStorage)
                 .ConfigureServices((service) => {
                     service.Configure<ApplicationOptions>(Configuration);
+                    service.AddOptions();
+                    service.AddSingleton<ApplicationOptions>(appOptions);
                     DependencyInjectionHelper.IocContainerRegistration(service);
                 })
                 .ConfigureLogging(logging => logging.AddConsole())

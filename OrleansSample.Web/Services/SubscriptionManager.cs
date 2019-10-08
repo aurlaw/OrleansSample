@@ -67,7 +67,7 @@ namespace OrleansSample.Web.Services
                                 record = "Cleared all Todos";
                             break;
                         }
-                        action(new SubscriptionEventArgs(hubContext, record));
+                        action(new SubscriptionEventArgs(hubContext, record, notification.Item));
                         logger.LogInformation("Notification Sent");
                         return Task.CompletedTask;
                     }));    
@@ -82,14 +82,15 @@ namespace OrleansSample.Web.Services
 
     public class SubscriptionEventArgs : EventArgs 
     {
-        public SubscriptionEventArgs(IHubContext<TodoHub> hubContext, string message)
+        public SubscriptionEventArgs(IHubContext<TodoHub> hubContext, string message, TodoItem item)
         {
             this.HubContext = hubContext;
             this.SubscriptionGroup = hubContext.Clients.Group(SubscriptionManager.SubGroup);
             this.Message = message;
-
+            this.Item = item;
         }
         public string Message {get;}
+        public TodoItem Item {get;}
         public IHubContext<TodoHub> HubContext {get;}
 
         public IClientProxy SubscriptionGroup {get;}

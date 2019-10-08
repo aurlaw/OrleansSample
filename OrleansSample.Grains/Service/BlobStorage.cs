@@ -13,14 +13,15 @@ namespace OrleansSample.Grains.Service
         private readonly ApplicationOptions options;
         private ILogger logger;
 
-        public BlobStorage(ILoggerFactory loggerFactory, IOptions<ApplicationOptions> options)
+        public BlobStorage(ILoggerFactory loggerFactory, ApplicationOptions options)
         {
             this.logger = loggerFactory.CreateLogger($"{this.GetType().Name}");
-            this.options = options.Value;
+            this.options = options;
         }
 
         public async Task<string> Upload(string name, string container, byte[] data)
         {
+            logger.LogInformation($"connection: {options.StorageConnection}");
             var storageAccount = CloudStorageAccount.Parse(options.StorageConnection);
             var client = storageAccount.CreateCloudBlobClient();
             // get/create container

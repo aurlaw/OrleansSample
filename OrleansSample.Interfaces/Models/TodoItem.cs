@@ -10,7 +10,7 @@ namespace OrleansSample.Interfaces.Models
         public string Title { get; }
         public DateTime Timestamp { get; }
 
-        public string ImageUrl {get; set;}
+        public string ImageUrl {get;}
 
         public TodoItem(Guid key, string title, DateTime time, string imageUrl = null) 
         {
@@ -21,12 +21,13 @@ namespace OrleansSample.Interfaces.Models
         }        
     }
 
+    [Immutable]
     public class TodoImageUpload
     {
-        public byte[] ImageData {get;}
+        public Immutable<byte[]> ImageData {get;}
         public string ImageName {get;}
 
-        public TodoImageUpload(string name, byte[] data)
+        public TodoImageUpload(string name, Immutable<byte[]> data)
         {
             ImageName = name;
             ImageData = data;
