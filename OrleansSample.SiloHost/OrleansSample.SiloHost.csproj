@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="2.4.2"/>
     <PackageReference Include="Microsoft.Orleans.Persistence.AdoNet" Version="2.4.2"/>
     <PackageReference Include="Microsoft.Orleans.Server" Version="2.4.2"/>
-    <PackageReference Include="System.Data.SqlClient" Version="4.7.0"/>
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6"/>
     <PackageReference Include="OrleansDashboard" Version="2.4.5"/>
     <PackageReference Include="Microsoft.Orleans.Persistence.AzureStorage" Version="2.4.2"/>
     <PackageReference Include="Microsoft.Orleans.Reminders.AzureStorage" Version="2.4.2"/>
